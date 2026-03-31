@@ -1,7 +1,11 @@
 ---
 - name: Configure Web Servers
   hosts: webservers
-  become: yes  # Run as sudo
+  become: yes
+
+  vars:
+    app_user: webadmin
+    app_dir: /var/www/myapp
 
   tasks:
     - name: Install Nginx
@@ -17,5 +21,47 @@
 
     - name: Deploy custom homepage
       copy:
-        content: "<h1>Hello from {{ inventory_hostname }} — Deployed by Ansible!</h1>"
+        content: "<h1>Hello from {{ inventory_hostname }} - This is Kay ji offor. Deployed by Ansible!</h1>"
         dest: /usr/share/nginx/html/index.html
+
+    # ── NEW TASK 1: Create a Linux user ──
+    - name: Create web admin user
+      user:
+        name: "{{ app_user }}"
+        state: present
+        shell: /bin/bash
+        create_home: yes
+
+    # ── NEW TASK 2: Firewall rule ──
+    - name: Install firewalld
+      yum:
+        name: firewalld
+        state: present
+
+    - name: Start and enable firewalld
+      service:
+        name: firewalld
+        state: started
+        enabled: yes
+
+    - name: Allow HTTP through firewall
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+        immediate: yes
+
+    # ── NEW TASK 3: Create directory and deploy config via Jinja2 ──
+    - name: Create app directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: "{{ app_user }}"
+        mode: '0755'
+
+    - name: Deploy config file from Jinja2 template
+      template:
+        src: app.conf.j2
+        dest: "{{ app_dir }}/app.conf"
+        owner: "{{ app_user }}"
+        mode: '0644'
