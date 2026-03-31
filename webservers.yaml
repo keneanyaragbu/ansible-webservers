@@ -65,3 +65,11 @@
         dest: "{{ app_dir }}/app.conf"
         owner: "{{ app_user }}"
         mode: '0644'
+
+    #Allow SSH via Firewall so i do not lock myself out.
+    - name: Allow SSH through firewall
+      firewalld:
+       service: ssh
+       permanent: yes
+       state: enabled
+       immediate: yes
