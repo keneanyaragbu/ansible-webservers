@@ -21,7 +21,7 @@
 
     - name: Deploy custom homepage
       copy:
-        content: "<h1>Hello from {{ inventory_hostname }} - This is Kay ji offor. Deployed by Ansible!</h1>"
+        content: "<h1>Hello from {{ inventory_hostname }} -  Deployed by Ansible Tower!</h1>"
         dest: /usr/share/nginx/html/index.html
 
     # ── NEW TASK 1: Create a Linux user ──
